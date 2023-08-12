@@ -14,8 +14,18 @@ async function addEmployee(req: Request, res: Response, next: NextFunction) {
     }
 }
 
+async function getAllEmployees(req: Request, res: Response, next: NextFunction) {
+    try {
+        const result = await employeeService.getAllEmployees()
+        res.status(httpStatus.OK).send(result)
+    } catch (error) {
+        next(error)
+    }
+}
+
 const employeeController = {
-    addEmployee
+    addEmployee,
+    getAllEmployees
 }
 
 export default employeeController

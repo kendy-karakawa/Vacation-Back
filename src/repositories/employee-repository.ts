@@ -14,9 +14,14 @@ async function findByName(name: string) {
   });
 }
 
+async function getAll() {
+  return await prisma.employee.findMany({})
+}
+
 const employeeRepository = {
   create,
   findByName,
+  getAll
 };
 
 export default employeeRepository;
