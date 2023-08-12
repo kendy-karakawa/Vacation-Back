@@ -1,4 +1,3 @@
-import { AddEmployeeData } from "@/protocols"
 import employeeService from "@/services/employee-service"
 import { NextFunction, Request, Response } from "express"
 import httpStatus from "http-status"

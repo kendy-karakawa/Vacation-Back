@@ -14,14 +14,24 @@ async function findByName(name: string) {
   });
 }
 
+async function getHireDateById(id: number) {
+  const date = await prisma.employee.findFirst({
+    where: { id },
+    select: { hireDate: true },
+  });
+
+  return date.hireDate
+}
+
 async function getAll() {
-  return await prisma.employee.findMany({})
+  return await prisma.employee.findMany({});
 }
 
 const employeeRepository = {
   create,
   findByName,
-  getAll
+  getAll,
+  getHireDateById,
 };
 
 export default employeeRepository;

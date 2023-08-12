@@ -3,6 +3,7 @@ import cors from "cors";
 import { connectDB, disconnectDB, loadEnv } from "./config";
 import employeeRouter from "./routers/employee-router";
 import { handleApplicationErrors } from "./middlewares/error-handling-middleware";
+import vacationRouter from "./routers/vacation-router";
 
 
 loadEnv();
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 app.get("/test", (_req, res) => res.send("hello!"));
 app.use("/employee", employeeRouter)
+app.use("/vacation", vacationRouter)
 app.use(handleApplicationErrors)
 
 export function init(): Promise<Express> {
