@@ -9,8 +9,11 @@ import { VacationPeriod } from "@prisma/client"
 async function createVacationPeriod(startDate:number, endDate:number, employeeId:number) {
     const hireDate = await employeeRepository.getHireDateById(employeeId)
     await isEligibleForVacation(hireDate, startDate)
+    await isValidConsecutiveVacationDays(startDate, endDate)
     const concessionPeriod: ConcessionPeriod =  await checkConcessionPeriod(hireDate, startDate)
-    await isValidVacationFracionationOrPeriod(startDate, endDate, employeeId, concessionPeriod)
+    await isValidVacationPeriod(startDate, endDate, concessionPeriod)
+    await isValidVacationFracionation(startDate, endDate,employeeId, concessionPeriod)
+
 }
 
 async function isEligibleForVacation(hireDate: Date, startDate:number) {
@@ -20,26 +23,67 @@ async function isEligibleForVacation(hireDate: Date, startDate:number) {
     
 }
 
+async function isValidConsecutiveVacationDays(startDate:number, endDate:number) {
+    const consecutiveVacationDays = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1
+    if(consecutiveVacationDays < 5) throw badrequestError("O periodo férias não podem ser inferior a 5 dias corridos")
+    if(consecutiveVacationDays > 30) throw badrequestError("O periodo férias não podem ser superior a 30 dias corridos")
+}
+
 async function checkConcessionPeriod(hireDate: Date, startDate: number) {
-    const hireYear = hireDate.getFullYear()
+    const hireMonth = hireDate.getMonth()
+    const hireDay = hireDate.getDate()
+
     const desiredYear = new Date(startDate).getFullYear()
-    
-    const differenceYear = desiredYear - hireYear
-    if(differenceYear === 0 ) throw badrequestError("Neste periodo, o funcionário ainda não tem direito a férias.")
+    const desiredmonth = new Date(startDate).getMonth()
+    const desiredDay = new Date(startDate).getDate()
 
-    const concessionStart = new Date(hireDate) 
-    concessionStart.setFullYear(hireDate.getFullYear() + differenceYear )
-    
-    const concessionEnd = new Date(hireDate) 
-    concessionEnd.setFullYear(concessionStart.getFullYear() + 1)
-    concessionEnd.setDate(hireDate.getDate() - 1)
+    const concessionEnd = new Date(hireDate)
+    if(desiredmonth < hireMonth || desiredmonth === hireMonth && desiredDay < hireDay ) {
+        concessionEnd.setFullYear(desiredYear)
+        concessionEnd.setDate(hireDate.getDate() - 1)
+    }else {
+        concessionEnd.setFullYear(desiredYear + 1)
+        concessionEnd.setDate(hireDate.getDate() - 1)
+    }
 
-    console.log(concessionStart)
-    console.log(hireDate.getDate())
-    console.log(concessionEnd)
+    const concessionStart  = new Date(hireDate)
+    concessionStart.setFullYear(concessionEnd.getFullYear() - 1)
 
-    return {concessionStart, concessionEnd}
     
+    return {
+        concessionStart,
+        concessionEnd,
+    }
+}
+
+async function isValidVacationPeriod(startDate:number, endDate:number, concessionPeriod: ConcessionPeriod) {
+    const {concessionStart, concessionEnd} = concessionPeriod 
+
+    const start = concessionStart.toISOString().split("T")[0]
+    const end = concessionEnd.toISOString().split("T")[0]
+    if(startDate <= concessionStart.getTime() ||  endDate >=  concessionEnd.getTime())
+         throw badrequestError(`O colaborador deve tirar ferias entre o periodo de ${start} até ${end}.`)
+}
+
+async function isValidVacationFracionation(startDate:number, endDate:number, employeeId:number, concessionPeriod: ConcessionPeriod) {
+    const consecutiveVacationDays = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1
+    const {concessionStart, concessionEnd} = concessionPeriod 
+    const reservedPeriod: VacationPeriod[] = await vacationRepository.findVacationsWithinDateRange(employeeId,concessionStart, concessionEnd )
+    if(reservedPeriod.length === 0) return
+    if(reservedPeriod.length > 2) throw badrequestError("O funcionário não pode mais tirar férias")
+
+    const daysTakenList = reservedPeriod.map(el => {
+        const start = el.startDate.getTime();
+        const end = el.endDate.getTime();
+        return (end - start) / (1000 * 60 * 60 * 24) + 1
+    })
+    
+    const totalDaysTaken = daysTakenList.reduce((acc, curr) => acc + curr, 0);
+    if(totalDaysTaken === 30) throw badrequestError("O funcionário já tirou 30 dias de ferias")
+    if(totalDaysTaken + consecutiveVacationDays > 30) throw badrequestError("As dastas selecionadas irão ultrapassar os 30 dias de ferias")
+    
+    const hasFourteenDaysPeriod = daysTakenList.some(days => days >= 14);
+    if(reservedPeriod.length === 2 && !hasFourteenDaysPeriod && consecutiveVacationDays < 14) throw badrequestError("O periodo selecionado tem que ser de pelo menos 14 dias")
 }
 
 async function isVacationPeriodOverlapping(startDate:number, endDate:number, employeeId:number) {
@@ -57,30 +101,10 @@ async function isVacationPeriodOverlapping(startDate:number, endDate:number, emp
     if(conflitedPeriod.length !== 0) throw conflictError("The dates are overlapping.")
 }
 
-async function isValidVacationFracionationOrPeriod(startDate:number, endDate:number, employeeId:number, concessionPeriod: ConcessionPeriod) {
-    const consecutiveVacationDays = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1
-    if(consecutiveVacationDays < 5) throw badrequestError("O periodo férias não podem ser inferior a 5 dias corridos")
-    if(consecutiveVacationDays > 30) throw badrequestError("O periodo férias não podem ser superior a 30 dias corridos")
-    await isValidVacationPeriod(startDate, endDate, concessionPeriod)
-}
-
-async function isValidVacationPeriod(startDate:number, endDate:number, concessionPeriod: ConcessionPeriod) {
-    const {concessionStart, concessionEnd} = concessionPeriod 
-
-    const start = concessionStart.toISOString().split("T")[0]
-    const end = concessionEnd.toISOString().split("T")[0]
-
-    if(concessionStart.getTime() <= startDate && startDate <= concessionEnd.getTime())
-        throw badrequestError(`O colaborador deve tirar ferias entre o periodo de ${start} até ${end}.`)
-    if(concessionStart.getTime() <= endDate && endDate <= concessionEnd.getTime())
-         throw badrequestError(`O colaborador deve tirar ferias entre o periodo de ${start} até ${end}.`)
-    if(startDate < concessionStart.getTime() && concessionEnd.getTime() < endDate)
-         throw badrequestError(`O colaborador deve tirar ferias entre o periodo de ${start} até ${end}.`)
-}
-
 
 const vacationService = {
-    createVacationPeriod
+    createVacationPeriod,
+
 }
 
 export default vacationService

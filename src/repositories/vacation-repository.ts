@@ -14,9 +14,34 @@ async function findAllByEmployeeId(employeeId: number) {
   });
 }
 
+async function findVacationsWithinDateRange(employeeId: number, concessionStart: Date, concessionEnd: Date) {
+  const vacationPeriods = await prisma.vacationPeriod.findMany({
+    where:{
+      employeeId,
+      OR:[
+        {
+          startDate:{
+            gte: concessionStart,
+            lte: concessionEnd
+          }
+        },
+        {
+          endDate:{
+            gte: concessionStart,
+            lte: concessionEnd
+          }
+        }
+      ]
+    }
+  })
+
+  return vacationPeriods;
+}
+
 const vacationRepository = {
   create,
-  findAllByEmployeeId
+  findAllByEmployeeId,
+  findVacationsWithinDateRange
 };
 
 export default vacationRepository;
