@@ -16,3 +16,8 @@ export type CreateVacationData = {
   endDate: Date;
   employeeId: number;
 };
+
+export type ConcessionPeriod = {
+  concessionStart: Date,
+  concessionEnd: Date
+}
