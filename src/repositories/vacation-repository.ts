@@ -1,6 +1,7 @@
 import { prisma } from "@/config";
+import { CreateVacationData } from "@/protocols";
 
-async function create(data) {
+async function create(data: CreateVacationData) {
   return await prisma.vacationPeriod.create({
     data,
   });

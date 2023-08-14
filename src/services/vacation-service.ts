@@ -1,6 +1,6 @@
 import { badrequestError } from "@/errors/bad-request-error"
 import { conflictError } from "@/errors/conflict-error"
-import { ConcessionPeriod } from "@/protocols"
+import { ConcessionPeriod, CreateVacationData } from "@/protocols"
 import employeeRepository from "@/repositories/employee-repository"
 import vacationRepository from "@/repositories/vacation-repository"
 import { VacationPeriod } from "@prisma/client"
@@ -13,6 +13,15 @@ async function createVacationPeriod(startDate:number, endDate:number, employeeId
     const concessionPeriod: ConcessionPeriod =  await checkConcessionPeriod(hireDate, startDate)
     await isValidVacationPeriod(startDate, endDate, concessionPeriod)
     await isValidVacationFracionation(startDate, endDate,employeeId, concessionPeriod)
+    await isVacationPeriodOverlapping(startDate, endDate,employeeId, concessionPeriod)
+
+    const data: CreateVacationData = {
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        employeeId
+    }
+
+    return await vacationRepository.create(data)
 
 }
 
@@ -86,8 +95,10 @@ async function isValidVacationFracionation(startDate:number, endDate:number, emp
     if(reservedPeriod.length === 2 && !hasFourteenDaysPeriod && consecutiveVacationDays < 14) throw badrequestError("O periodo selecionado tem que ser de pelo menos 14 dias")
 }
 
-async function isVacationPeriodOverlapping(startDate:number, endDate:number, employeeId:number) {
-    const reservedPeriod: VacationPeriod[] = await vacationRepository.findAllByEmployeeId(employeeId)
+async function isVacationPeriodOverlapping(startDate:number, endDate:number, employeeId:number, concessionPeriod: ConcessionPeriod) {
+    const {concessionStart, concessionEnd} = concessionPeriod 
+    const reservedPeriod: VacationPeriod[] = await vacationRepository.findVacationsWithinDateRange(employeeId,concessionStart, concessionEnd )
+    console.log(reservedPeriod.length)
     if(!reservedPeriod) return 
     const conflitedPeriod = reservedPeriod.filter((el)=> {
         if(el.startDate.getTime() <= startDate && startDate <= el.endDate.getTime())
@@ -98,7 +109,7 @@ async function isVacationPeriodOverlapping(startDate:number, endDate:number, emp
         return true;
     return false
     })
-    if(conflitedPeriod.length !== 0) throw conflictError("The dates are overlapping.")
+    if(conflitedPeriod.length !== 0) throw conflictError("As datas estão se sobrepondo.")
 }
 
 

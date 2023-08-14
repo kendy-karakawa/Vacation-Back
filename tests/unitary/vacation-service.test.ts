@@ -1,4 +1,5 @@
 import { badrequestError } from "@/errors/bad-request-error";
+import { conflictError } from "@/errors/conflict-error";
 import employeeRepository from "@/repositories/employee-repository";
 import vacationRepository from "@/repositories/vacation-repository";
 import vacationService from "@/services/vacation-service";
@@ -188,7 +189,9 @@ describe("Vacation service test suite", () => {
     await expect(
       vacationService.createVacationPeriod(startDate, endDate, employeeId)
     ).rejects.toEqual(
-      badrequestError("As dastas selecionadas irão ultrapassar os 30 dias de ferias")
+      badrequestError(
+        "As dastas selecionadas irão ultrapassar os 30 dias de ferias"
+      )
     );
   });
 
@@ -203,7 +206,7 @@ describe("Vacation service test suite", () => {
       .mockImplementationOnce((): any => {
         return hireDate;
       });
-    
+
     jest
       .spyOn(vacationRepository, "findVacationsWithinDateRange")
       .mockImplementationOnce((): any => {
@@ -224,5 +227,122 @@ describe("Vacation service test suite", () => {
     ).rejects.toEqual(
       badrequestError("O periodo selecionado tem que ser de pelo menos 14 dias")
     );
+  });
+
+  it("should with bad request error, when startDate is between the period of another vacation", async () => {
+    const hireDate = new Date("2022-04-11");
+    const employeeId = 1;
+    const startDate = new Date("2023-06-05").getTime();
+    const endDate = new Date("2023-06-17").getTime();
+
+    jest
+      .spyOn(employeeRepository, "getHireDateById")
+      .mockImplementationOnce((): any => {
+        return hireDate;
+      });
+
+    jest
+      .spyOn(vacationRepository, "findVacationsWithinDateRange")
+      .mockImplementationOnce((): any => {
+        return [
+          {
+            startDate: new Date("2023-06-01"),
+            endDate: new Date("2023-06-08"),
+          },
+        ];
+      });
+
+    jest
+      .spyOn(vacationRepository, "findVacationsWithinDateRange")
+      .mockImplementationOnce((): any => {
+        return [
+          {
+            startDate: new Date("2023-06-01"),
+            endDate: new Date("2023-06-08"),
+          },
+        ];
+      });
+
+    await expect(
+      vacationService.createVacationPeriod(startDate, endDate, employeeId)
+    ).rejects.toEqual(conflictError("As datas estão se sobrepondo."));
+  });
+
+  it("should with bad request error, when endDate is between the period of another vacation", async () => {
+    const hireDate = new Date("2022-04-11");
+    const employeeId = 1;
+    const startDate = new Date("2023-05-25").getTime();
+    const endDate = new Date("2023-06-02").getTime();
+
+    jest
+      .spyOn(employeeRepository, "getHireDateById")
+      .mockImplementationOnce((): any => {
+        return hireDate;
+      });
+
+    jest
+      .spyOn(vacationRepository, "findVacationsWithinDateRange")
+      .mockImplementationOnce((): any => {
+        return [
+          {
+            startDate: new Date("2023-06-01"),
+            endDate: new Date("2023-06-08"),
+          },
+        ];
+      });
+
+    jest
+      .spyOn(vacationRepository, "findVacationsWithinDateRange")
+      .mockImplementationOnce((): any => {
+        return [
+          {
+            startDate: new Date("2023-06-01"),
+            endDate: new Date("2023-06-08"),
+          },
+        ];
+      });
+
+    await expect(
+      vacationService.createVacationPeriod(startDate, endDate, employeeId)
+    ).rejects.toEqual(conflictError("As datas estão se sobrepondo."));
+  });
+
+  it("should with bad request error, when the period of another vacation is between this vacation period ", async () => {
+    const hireDate = new Date("2022-04-11");
+    const employeeId = 1;
+    const startDate = new Date("2023-05-30").getTime();
+    const endDate = new Date("2023-06-09").getTime();
+
+    jest
+      .spyOn(employeeRepository, "getHireDateById")
+      .mockImplementationOnce((): any => {
+        return hireDate;
+      });
+
+    jest
+      .spyOn(vacationRepository, "findVacationsWithinDateRange")
+      .mockImplementationOnce((): any => {
+        return [
+          {
+            startDate: new Date("2023-06-01"),
+            endDate: new Date("2023-06-08"),
+          },
+        ];
+      });
+
+    jest
+      .spyOn(vacationRepository, "findVacationsWithinDateRange")
+      .mockImplementationOnce((): any => {
+        return [
+          {
+            startDate: new Date("2023-06-01"),
+            endDate: new Date("2023-06-08"),
+          },
+        ];
+      });
+
+    await expect(
+      vacationService.createVacationPeriod(startDate, endDate, employeeId)
+    ).rejects.toEqual(conflictError("As datas estão se sobrepondo."));
   });
 });
