@@ -1,6 +1,6 @@
 import { conflictError } from "@/errors/conflict-error";
 import { notFoundError } from "@/errors/not-found-error";
-import { AddEmployeeData } from "@/protocols";
+import { AddEmployeeData, UpDateEmployeeData } from "@/protocols";
 import employeeRepository from "@/repositories/employee-repository";
 
 
@@ -23,13 +23,31 @@ async function getAllEmployees() {
   return employees
 }
 
+async function updateEmployee(id: number, data: UpDateEmployeeData) {
+  const employee = await employeeRepository.getById(id)
+  if(!employee) throw notFoundError("Colaborador não encontrado!")
+  if(data.name) await checkEmployeeExistence(data.name)
+  return await employeeRepository.upDate(id, data)
+  
+}
+
+async function deleteEmployee(id: number) {
+  const employee = await employeeRepository.getById(id)
+  if(!employee) throw notFoundError("Colaborador não encontrado!")
+  return await employeeRepository.deleteEmployee(id)
+}
+
 async function checkEmployeeExistence(name: string) {
   const nameAlreadyExist = await employeeRepository.findByName(name);
-  if (nameAlreadyExist) throw conflictError("This employee already exist!");
+  if (nameAlreadyExist) throw conflictError("Ja existe um colaborador com este nome");
 }
+
+
 const employeeService = {
   addEmployee,
-  getAllEmployees
+  getAllEmployees,
+  updateEmployee,
+  deleteEmployee
 };
 
 export default employeeService;

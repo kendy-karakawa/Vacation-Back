@@ -11,6 +11,12 @@ export type AddEmployeeData = {
   hireDate: Date;
 };
 
+export type UpDateEmployeeData = {
+  name?: string;
+  position?: string;
+  hireDate?: Date;
+}
+
 export type CreateVacationData = {
   startDate: Date;
   endDate: Date;
