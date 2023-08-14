@@ -23,6 +23,6 @@ model VacationPeriod {
   startDate         DateTime
   endDate           DateTime
   employeeId        Int
-  employee          Employee     @relation(fields: [employeeId], references: [id])
+  employee          Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
