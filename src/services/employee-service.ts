@@ -19,7 +19,7 @@ async function addEmployee(name: string, position: string, date:number ) {
 
 async function getAllEmployees() {
   const employees = await employeeRepository.getAll() 
-  if(!employees) throw notFoundError("There are no registered employees!") 
+  if(employees.length === 0) throw notFoundError("There are no registered employees!") 
   return employees
 }
 

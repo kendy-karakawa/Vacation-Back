@@ -1,5 +1,5 @@
 import employeeController from "@/controllers/employee-controller";
-import { validateBody } from "@/middlewares/validation-middleware";
+import { validateBody, validateParams } from "@/middlewares/validation-middleware";
 import { employeeSchema, putEmployeeSchema } from "@/schemas/employee-schemas";
 import { Router } from "express";
 
@@ -8,7 +8,7 @@ const employeeRouter = Router()
 employeeRouter
     .post("/", validateBody(employeeSchema), employeeController.addEmployee)
     .get("/", employeeController.getAllEmployees)
-    .put("/:id", validateBody(putEmployeeSchema), employeeController.updateEmployee)
+    .put("/:id",validateBody(putEmployeeSchema), employeeController.updateEmployee)
     .delete("/:id", employeeController.deleteEmployee )
 
 

@@ -26,6 +26,7 @@ async function getAllEmployees(req: Request, res: Response, next: NextFunction) 
 async function updateEmployee(req: Request, res: Response, next: NextFunction) {
     const id = parseInt(req.params.id)
     const data = req.body as UpDateEmployeeData
+    console.log(id)
     try {
         await employeeService.updateEmployee(id, data)
         res.sendStatus(httpStatus.OK)

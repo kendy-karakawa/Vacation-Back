@@ -98,7 +98,7 @@ async function isValidVacationFracionation(startDate:number, endDate:number, emp
 async function isVacationPeriodOverlapping(startDate:number, endDate:number, employeeId:number, concessionPeriod: ConcessionPeriod) {
     const {concessionStart, concessionEnd} = concessionPeriod 
     const reservedPeriod: VacationPeriod[] = await vacationRepository.findVacationsWithinDateRange(employeeId,concessionStart, concessionEnd )
-    console.log(reservedPeriod.length)
+    
     if(!reservedPeriod) return 
     const conflitedPeriod = reservedPeriod.filter((el)=> {
         if(el.startDate.getTime() <= startDate && startDate <= el.endDate.getTime())

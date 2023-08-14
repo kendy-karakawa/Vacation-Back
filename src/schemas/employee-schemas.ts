@@ -8,8 +8,8 @@ export const employeeSchema = Joi.object<AddEmployeeData>({
 })
 
 export const putEmployeeSchema = Joi.object({
-    id: Joi.number().required(),
     name: Joi.string().min(2),
     position: Joi.string().min(2),
     hireDate: Joi.number().min(3162240000)
 })
+

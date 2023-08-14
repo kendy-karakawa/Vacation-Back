@@ -1,7 +1,6 @@
 import { prisma } from "@/config";
 import { AddEmployeeData, UpDateEmployeeData } from "@/protocols";
-import { Prisma } from "@prisma/client";
-import { number } from "joi";
+
 
 async function create(data: AddEmployeeData) {
   return await prisma.employee.create({ data });
@@ -44,9 +43,11 @@ async function deleteEmployee(id: number) {
 }
 
 async function getById(id: number) {
-  return await prisma.employee.findFirst({
+  const result = await prisma.employee.findFirst({
     where: {id}
   })
+
+  return result 
 }
 
 const employeeRepository = {
