@@ -10,6 +10,7 @@ employeeRouter
     .get("/", employeeController.getAllEmployees)
     .put("/:id",validateBody(putEmployeeSchema), employeeController.updateEmployee)
     .delete("/:id", employeeController.deleteEmployee )
+    .get("/:id", employeeController.getEmployeeData)
 
 
 export default employeeRouter;

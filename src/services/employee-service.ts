@@ -37,17 +37,26 @@ async function deleteEmployee(id: number) {
   return await employeeRepository.deleteEmployee(id)
 }
 
+async function getEmployeeData(id: number) {
+  const employee = await employeeRepository.getById(id)
+  if(!employee) throw notFoundError("Colaborador não encontrado!")
+  return employee
+}
+
 async function checkEmployeeExistence(name: string) {
   const nameAlreadyExist = await employeeRepository.findByName(name);
   if (nameAlreadyExist) throw conflictError("Ja existe um colaborador com este nome");
 }
 
 
+
+
 const employeeService = {
   addEmployee,
   getAllEmployees,
   updateEmployee,
-  deleteEmployee
+  deleteEmployee,
+  getEmployeeData,
 };
 
 export default employeeService;

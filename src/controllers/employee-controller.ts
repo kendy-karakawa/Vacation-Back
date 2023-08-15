@@ -44,11 +44,22 @@ async function deleteEmployee(req: Request, res: Response, next: NextFunction) {
     }
 }
 
+async function getEmployeeData(req: Request, res: Response, next: NextFunction) {
+    const id = parseInt(req.params.id)
+    try {
+        const result = await employeeService.getEmployeeData(id)
+        res.status(httpStatus.OK).send(result)
+    } catch (error) {
+        next(error)
+    }
+}
+
 const employeeController = {
     addEmployee,
     getAllEmployees,
     updateEmployee,
-    deleteEmployee
+    deleteEmployee,
+    getEmployeeData
 }
 
 export default employeeController

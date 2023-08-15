@@ -12,6 +12,11 @@ beforeEach(async () => {
   await prisma.employee.deleteMany({});
 });
 
+afterAll(async()=>{
+  await prisma.vacationPeriod.deleteMany({});
+  await prisma.employee.deleteMany({});
+})
+
 const server = supertest(app);
 
 describe("POST /employee", () => {

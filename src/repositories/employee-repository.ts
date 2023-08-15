@@ -1,4 +1,5 @@
 import { prisma } from "@/config";
+import { notFoundError } from "@/errors/not-found-error";
 import { AddEmployeeData, UpDateEmployeeData } from "@/protocols";
 
 
@@ -19,6 +20,10 @@ async function getHireDateById(id: number) {
     where: { id },
     select: { hireDate: true },
   });
+
+  if(!date){
+    throw notFoundError("nao achei o hireDate")
+  }
 
   return date.hireDate
 }
@@ -44,11 +49,15 @@ async function deleteEmployee(id: number) {
 
 async function getById(id: number) {
   const result = await prisma.employee.findFirst({
-    where: {id}
+    where: {id},
+    include: {
+      VacationPeriod: true
+    }
   })
 
   return result 
 }
+
 
 const employeeRepository = {
   create,

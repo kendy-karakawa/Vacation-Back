@@ -16,6 +16,11 @@ beforeEach(async () => {
   await prisma.employee.deleteMany({});
 });
 
+afterAll(async () => {
+  await prisma.vacationPeriod.deleteMany({});
+  await prisma.employee.deleteMany({});
+});
+
 const server = supertest(app);
 
 describe("POST /vacation", () => {
@@ -74,6 +79,9 @@ describe("POST /vacation", () => {
 
   describe("when body is valid", () => {
     it("should respond with status 201 and create vacation period", async () => {
+      await prisma.vacationPeriod.deleteMany({});
+      await prisma.employee.deleteMany({});
+      
       const toDay = new Date();
       const toDayMiliseconds = toDay.getTime();
       const oneDay = 86400000;
@@ -81,12 +89,22 @@ describe("POST /vacation", () => {
       const endDate = toDayMiliseconds + oneDay * 10;
 
       const data = {
-        name: "Kendy",
+        name: "Luis",
         position: "back-end",
         hireDate: new Date("2020-01-01"),
       };
 
-      const { id } = await createEmployeeWithParamsData(data);
+      const faker = await createEmployeeWithParamsData(data);
+      const id = faker.id;
+
+      const date = await prisma.employee.findFirst({
+        where: { id },
+        select: { hireDate: true },
+      });
+
+      console.log(date);
+
+      console.log(faker);
 
       const body = {
         id: id,
@@ -94,7 +112,12 @@ describe("POST /vacation", () => {
         endDate: endDate,
       };
 
+      console.log(body);
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const response = await server.post("/vacation").send(body);
+      console.log(response.body);
       expect(response.status).toBe(httpStatus.CREATED);
       expect(response.body).toEqual({
         id: expect.any(Number),
