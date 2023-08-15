@@ -6,8 +6,8 @@ import httpStatus from "http-status"
 async function createVacationPeriod(req: Request, res: Response, next: NextFunction) {
     const {startDate, endDate, id} = req.body
     try {
-        await vacationService.createVacationPeriod(startDate, endDate, id)
-        res.sendStatus(httpStatus.CREATED)
+        const result = await vacationService.createVacationPeriod(startDate, endDate, id)
+        res.status(httpStatus.CREATED).send(result)
     } catch (error) {
         next(error)
     }

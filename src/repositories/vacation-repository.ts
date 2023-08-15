@@ -2,17 +2,21 @@ import { prisma } from "@/config";
 import { CreateVacationData } from "@/protocols";
 
 async function create(data: CreateVacationData) {
-  return await prisma.vacationPeriod.create({
+  const result = await prisma.vacationPeriod.create({
     data,
   });
+
+  return result
 }
 
 async function findAllByEmployeeId(employeeId: number) {
-  return await prisma.vacationPeriod.findMany({
+  const result = await prisma.vacationPeriod.findMany({
     where: {
       employeeId,
     },
   });
+
+  return result
 }
 
 async function findVacationsWithinDateRange(employeeId: number, concessionStart: Date, concessionEnd: Date) {

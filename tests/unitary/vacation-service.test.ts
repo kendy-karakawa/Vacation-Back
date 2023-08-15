@@ -345,4 +345,51 @@ describe("Vacation service test suite", () => {
       vacationService.createVacationPeriod(startDate, endDate, employeeId)
     ).rejects.toEqual(conflictError("As datas estão se sobrepondo."));
   });
+
+  // it("should with status 201, when create a vacation period ", async () => {
+  //   const hireDate = new Date("2022-04-11");
+  //   const employeeId = 1;
+  //   const startDate = new Date("2023-07-30").getTime();
+  //   const endDate = new Date("2023-08-09").getTime();
+
+  //   jest
+  //     .spyOn(employeeRepository, "getHireDateById")
+  //     .mockImplementationOnce((): any => {
+  //       return hireDate;
+  //     });
+
+  //   jest
+  //     .spyOn(vacationRepository, "findVacationsWithinDateRange")
+  //     .mockImplementationOnce((): any => {
+  //       return [
+  //         {
+  //           startDate: new Date("2023-06-01"),
+  //           endDate: new Date("2023-06-08"),
+  //         },
+  //       ];
+  //     });
+
+  //   jest
+  //     .spyOn(vacationRepository, "findVacationsWithinDateRange")
+  //     .mockImplementationOnce((): any => {
+  //       return [
+  //         {
+  //           startDate: new Date("2023-06-01"),
+  //           endDate: new Date("2023-06-08"),
+  //         },
+  //       ];
+  //     });
+
+  //   jest.spyOn(vacationRepository, "create").mockImplementationOnce((): any => {
+  //     return {
+  //       id: 1,
+  //       name: "kendy",
+  //       startDate: new Date("2023-07-30"),
+  //       endDate: new Date("2023-08-09"),
+  //     };
+  //   });
+
+  //   const result = await vacationService.createVacationPeriod(startDate, endDate, employeeId)
+    
+  // });
 });

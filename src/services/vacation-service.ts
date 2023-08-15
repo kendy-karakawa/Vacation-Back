@@ -7,6 +7,7 @@ import { VacationPeriod } from "@prisma/client"
 
 
 async function createVacationPeriod(startDate:number, endDate:number, employeeId:number) {
+    
     const hireDate = await employeeRepository.getHireDateById(employeeId)
     await isEligibleForVacation(hireDate, startDate)
     await isValidConsecutiveVacationDays(startDate, endDate)
@@ -21,7 +22,8 @@ async function createVacationPeriod(startDate:number, endDate:number, employeeId
         employeeId
     }
 
-    return await vacationRepository.create(data)
+    const vacationPeriod = await vacationRepository.create(data)
+    return vacationPeriod
 
 }
 

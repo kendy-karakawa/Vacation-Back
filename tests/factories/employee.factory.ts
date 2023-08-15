@@ -1,4 +1,5 @@
 import { prisma } from "@/config";
+import { AddEmployeeData } from "@/protocols";
 
 export async function createEmployee(params: string) {
     const hireDate = new Date("2023-08-10")
@@ -9,4 +10,8 @@ export async function createEmployee(params: string) {
             hireDate 
         }
     })
+}
+
+export async function createEmployeeWithParamsData(data: AddEmployeeData) {
+    return await prisma.employee.create({data})
 }
